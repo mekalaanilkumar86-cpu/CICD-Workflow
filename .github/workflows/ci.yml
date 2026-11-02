@@ -50,9 +50,22 @@ jobs:
           echo '![](./FeatureImportance.png "FeatureImportance")' >> report1.md
 
           cat report.md report1.md > combined_file.md
+          
 
       - name: Publish report
         if: github.event_name == 'pull_request'
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: cml comment create combined_file.md
+
+      - name: Upload generated reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: ML-Training-Reports
+          path: |
+            report.md
+            report1.md
+            combined_file.md
+            scores.txt
+            ConfusionMatrix.png
+            FeatureImportance.png
