@@ -1,10 +1,16 @@
 name: Model Training CICD
 
 permissions:
-  id-token: write
-  contents: write
+  contents: read
+  pull-requests: write
+  issues: write
+
 on:
   push:
+    branches: [main]
+
+  pull_request:
+    branches: [main]
 
 jobs:
   run:
@@ -40,8 +46,13 @@ jobs:
           cat scores.txt >> report.md
 
           echo "Confusion Matrix & Feature Importance" > report1.md
-          echo '|[](./ConfusionMatrix.png "ConfusionMatrix")' >> report1.md
-          echo '|[](./FeatureImportance.png "FeatureImportance")' >> report1.md
+          echo '![](./ConfusionMatrix.png "ConfusionMatrix")' >> report1.md
+          echo '![](./FeatureImportance.png "FeatureImportance")' >> report1.md
 
           cat report.md report1.md > combined_file.md
-          cml comment create combined_file.md
+
+      - name: Publish report
+        if: github.event_name == 'pull_request'
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: cml comment create combined_file.md
